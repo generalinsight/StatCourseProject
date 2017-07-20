@@ -1,0 +1,108 @@
+---
+title: "An Interesting Analysis of Tooth Growth"
+author: "generalinsight"
+date: "July 20, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Overview
+
+Analyzie tooth growth (data:ToothGrowth in R datasets package) to perform basic exploratory analysis, a summary of the data, model to compare tooth growth by **supp** and **dose**, and finally provide conclusions.
+
+### Data Exploration
+
+First, We load the data, and necessary libraries. and perform exploratory analysis.
+
+```{r}
+data("ToothGrowth")
+library(tidyverse)
+
+str(ToothGrowth)
+summary(ToothGrowth)
+head(ToothGrowth,10)
+
+```
+
+We plan to model **len** on **supp** (2 level factor) and **dose** (only 3 levels); We change dose to being factors. 
+
+
+```{r}
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+```
+
+
+### Data Summary
+
+From the plots below, we can see that 
+
+
+```{r}
+
+ggplot(ToothGrowth, aes(dose, len)) +
+        geom_violin(aes(fill = dose)) +
+        facet_grid(.~ supp) +
+        labs(x = "Dosage", y = "Length", title = "Length vs Dosage by Supp", caption = "Figure - 1: higher dosage (dose) leads to higher tooth length (len), irrespective of supplement (supp)")
+        
+
+```
+
+
+```{r}
+ggplot(ToothGrowth, aes(supp, len)) +
+        geom_violin(aes(fill = supp)) +
+        facet_grid(.~ dose) +
+        labs(x = "Supplement", y = "Length", title = "Length by Supplement for Dosage", caption = "Figure - 1: For each dosage (dose), slightly varying tooth lengths (len) per supplement (supp)")
+        
+```
+
+
+### Model
+
+Now we move to modeliing the data to thru confidence interval and hypothesis testing 
+
+```{r}
+
+t.test(len ~ supp, ToothGrowth)
+
+```
+
+We find that confidence interval includes 0, and p-value is 0.06 which is greater than 0.05. Therefore, supp ( suplement type) has no impact on tooth growth.
+
+**Below, we are doing a series of comparison on tooth growth by dosage.**
+
+```{r}
+
+t1 <- subset(ToothGrowth, ToothGrowth$dose %in% c(0.5, 1.0))
+t.test(len ~ dose, t1)
+
+
+t1 <- subset(ToothGrowth, ToothGrowth$dose %in% c(0.5, 2.0))
+t.test(len ~ dose, t1)
+
+t1 <- subset(ToothGrowth, ToothGrowth$dose %in% c(1.0, 2.0))
+t.test(len ~ dose, t1)
+
+
+```
+
+Based on the results - none of the confidence intervals include 0, as well, the p-values are substanltially small for every tests. 
+
+
+###Conclusion
+
+Therefore, we can reject null hypothesis, eg we find that tooth length increases with dosage increased. 
+
+This happens irrespective of the different suppplement delivery methods - eg. supp showed to have no effect on tooth growth.
+
+
+
+
+
+
+
